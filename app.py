@@ -37,22 +37,38 @@ net_cash_flow = income - expense
 debt_pressure = debt / income if income > 0 else 0
 
 if st.sidebar.button("Prediksi Kondisi"):
-    input_data = np.zeros((1, 98)) 
-    input_data[0, 0] = expense_ratio
-    input_data[0, 1] = net_cash_flow
+    # 1. Buat DataFrame dengan satu baris berisi nol, kolom sesuai model_features
+    input_df = pd.DataFrame(0, index=[0], columns=model_features)
     
-    prediction = model.predict(input_data)
+    # 2. Masukkan input user ke kolom yang tepat
+    if 'expense_ratio' in input_df.columns:
+        input_df['expense_ratio'] = expense_ratio
+    if 'net_cash_flow' in input_df.columns:
+        input_df['net_cash_flow'] = net_cash_flow
+    if 'debt_pressure' in input_df.columns:
+        input_df['debt_pressure'] = debt_pressure
     
-    # Tampilkan Hasil
-    st.subheader("Hasil Analisis AI")
-    if prediction[0] == 0: # Misal 0 = Growth
-        st.success("Kondisi Anda: **GROWTH** (Sangat Sehat)")
-    elif prediction[0] == 1: # Misal 1 = Stable
-        st.info("Kondisi Anda: **STABLE** (Cukup Aman)")
-    else:
-        st.warning("Kondisi Anda: **SURVIVAL** (Waspada!)")
+    # 3. Prediksi (Urutan kolom otomatis mengikuti model_features)
+    try:
+        input_df = input_df[model_features] 
+        
+        prediction = model.predict(input_df)
+        
+        # 4. Transformasi hasil angka ke label teks
+        res_label = encoder.inverse_transform(prediction)
+        
+        st.subheader("Hasil Analisis AI")
+        if res_label[0] == 'Growth':
+            st.success(f"Kondisi Anda: **{res_label[0]}** (Sangat Sehat) 🚀")
+        elif res_label[0] == 'Stable':
+            st.info(f"Kondisi Anda: **{res_label[0]}** (Cukup Aman) ✅")
+        else:
+            st.warning(f"Kondisi Anda: **{res_label[0]}** (Waspada!) ⚠️")
+            
+    except Exception as e:
+        st.error(f"Terjadi kesalahan saat prediksi: {e}")
 
-# 4. Tampilkan Insight Statis (Bisa dari hasil A/B Testing tadi)
+# 5. Tampilkan Insight Statis
 st.divider()
 st.subheader("Insight Strategis")
 col1, col2 = st.columns(2)
