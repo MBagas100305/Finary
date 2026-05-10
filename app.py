@@ -4,7 +4,9 @@ import joblib
 import numpy as np
 
 # 1. Load Model
-model = joblib.load('final_model_gb.pkl')
+model = joblib.load(os.path.join(base_dir, 'model_finary.pkl'))
+encoder = joblib.load(os.path.join(base_dir, 'label_encoder.pkl'))
+model_features = joblib.load(os.path.join(base_dir, 'model_features.pkl'))
 
 st.title("📊 FINARY")
 st.markdown("Dashboard ini menggunakan **AI (Random Forest)** untuk memprediksi kondisi finansial Anda.")
