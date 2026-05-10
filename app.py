@@ -4,10 +4,23 @@ import joblib
 import numpy as np
 import os
 
-# 1. Load Model
-model = joblib.load(os.path.join(base_dir, 'model_finary.pkl'))
-encoder = joblib.load(os.path.join(base_dir, 'label_encoder.pkl'))
-model_features = joblib.load(os.path.join(base_dir, 'model_features.pkl'))
+def load_data(file_name):
+    if os.path.exists(file_name):
+        return joblib.load(file_name)
+    # Jika file ada di dalam folder 'finary'
+    elif os.path.exists(os.path.join('finary', file_name)):
+        return joblib.load(os.path.join('finary', file_name))
+    else:
+        raise FileNotFoundError(f"File {file_name} tidak ditemukan di root maupun folder finary")
+
+try:
+    model = load_data('model_finary.pkl')
+    encoder = load_data('label_encoder.pkl')
+    model_features = load_data('model_features.pkl')
+except Exception as e:
+    st.error(f"Gagal memuat file model: {e}")
+    st.stop()
+# ---------------------------------------
 
 st.title("📊 FINARY")
 st.markdown("Dashboard ini menggunakan **AI (Random Forest)** untuk memprediksi kondisi finansial Anda.")
