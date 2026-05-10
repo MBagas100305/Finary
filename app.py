@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import joblib
 import numpy as np
+import os
 
 # 1. Load Model
 model = joblib.load(os.path.join(base_dir, 'model_finary.pkl'))
