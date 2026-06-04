@@ -27,15 +27,16 @@ st.markdown("Dashboard ini menggunakan **AI (Random Forest)** untuk memprediksi 
 
 # 2. Sidebar untuk Input User
 st.sidebar.header("Input Data Keuangan")
-income = st.sidebar.number_input("Pendapatan Bulanan", min_value=0)
-expense = st.sidebar.number_input("Total Pengeluaran", min_value=0)
-debt = st.sidebar.number_input("Total Cicilan/Hutang", min_value=0)
+income = st.sidebar.number_input("Pendapatan Bulanan (IDR)", min_value=0, value=5000000, step=50000)
+expense = st.sidebar.number_input("Total Pengeluaran (IDR)", min_value=0, value=3000000, step=50000)
+debt = st.sidebar.number_input("Total Cicilan/Hutang (IDR)", min_value=0, value=500000, step=50000)
 
 # 3. Hitung Feature Engineering (Harus sama dengan di Notebook)
 expense_ratio = expense / income if income > 0 else 0
 net_cash_flow = income - expense
 debt_pressure = debt / income if income > 0 else 0
 
+# Kita bungkus proses prediksi dan insight ke dalam tombol trigger agar berjalan bersamaan
 if st.sidebar.button("Prediksi Kondisi"):
     # 1. Buat DataFrame dengan satu baris berisi nol, kolom sesuai model_features
     input_df = pd.DataFrame(0, index=[0], columns=model_features)
@@ -56,21 +57,56 @@ if st.sidebar.button("Prediksi Kondisi"):
         
         # 4. Transformasi hasil angka ke label teks
         res_label = encoder.inverse_transform(prediction)
+        kondisi = res_label[0]
         
         st.subheader("Hasil Analisis AI")
-        if res_label[0] == 'Growth':
-            st.success(f"Kondisi Anda: **{res_label[0]}** (Sangat Sehat) 🚀")
-        elif res_label[0] == 'Stable':
-            st.info(f"Kondisi Anda: **{res_label[0]}** (Cukup Aman) ✅")
+        if kondisi == 'Growth':
+            st.success(f"Kondisi Anda: **{kondisi}** (Sangat Sehat) 🚀")
+        elif kondisi == 'Stable':
+            st.info(f"Kondisi Anda: **{kondisi}** (Cukup Aman) ✅")
         else:
-            st.warning(f"Kondisi Anda: **{res_label[0]}** (Waspada!) ⚠️")
+            st.warning(f"Kondisi Anda: **{kondisi}** (Waspada!) ⚠️")
+            
+        # 5. Tampilkan Insight DINAMIS (Dimasukkan ke dalam blok IF prediksi)
+        st.divider()
+        st.subheader("Insight Strategis")
+        col1, col2, col3 = st.columns(3)
+        
+        # Metrik 1: Rasio Pengeluaran Dinamis
+        col1.metric(
+            label="Rasio Pengeluaran", 
+            value=f"{expense_ratio * 100:.1f}%", 
+            delta="Aman (≤ 70%)" if expense_ratio <= 0.7 else "Terlalu Tinggi (> 70%)",
+            delta_color="normal" if expense_ratio <= 0.7 else "inverse"
+        )
+        
+        # Metrik 2: Sisa Uang / Net Cash Flow Dinamis
+        col2.metric(
+            label="Sisa Uang (Cash Flow)", 
+            value=f"IDR {net_cash_flow:,.0f}", 
+            delta="Positif" if net_cash_flow > 0 else "Defisit!",
+            delta_color="normal" if net_cash_flow > 0 else "inverse"
+        )
+        
+        # Metrik 3: Rekomendasi Alokasi Tabungan berdasarkan prediksi AI
+        if kondisi == 'Growth':
+            rekomendasi_saving = income * 0.30  # Amankan 30% untuk investasi
+            tips = "Disarankan investasi agresif"
+        elif kondisi == 'Stable':
+            rekomendasi_saving = income * 0.20  # Amankan 20% standard
+            tips = "Amankan dana darurat"
+        else:
+            rekomendasi_saving = income * 0.10  # Pangkas pengeluaran, amankan minimal 10%
+            tips = "Kurangi pengeluaran tersier!"
+            
+        col3.metric(
+            label="Target Tabungan Minimal", 
+            value=f"IDR {rekomendasi_saving:,.0f}", 
+            delta=tips
+        )
             
     except Exception as e:
         st.error(f"Terjadi kesalahan saat prediksi: {e}")
-
-# 5. Tampilkan Insight Statis
-st.divider()
-st.subheader("Insight Strategis")
-col1, col2 = st.columns(2)
-col1.metric("Efektivitas AI", "92%", "+7% Saving")
-col2.metric("Rata-rata Penghematan", "IDR 150.000", "per user")
+else:
+    # Kondisi stand-by saat user baru pertama kali buka web dan belum klik tombol prediksi
+    st.info("💡 Silakan isi data keuangan Anda di sidebar kiri, lalu klik **'Prediksi Kondisi'** untuk melihat hasil analisis dan insight.")
