@@ -11,30 +11,53 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom Corporate Style Sheet (Clean Web Consulting Interface)
+# Custom Corporate Style Sheet (Adaptif Mode Terang & Gelap)
 st.markdown("""
     <style>
-    /* Mengubah font dasar dan latar belakang */
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-    html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
     
-    /* Desain Kartu Ringkasan Eksekutif */
+    /* Menggunakan font Inter untuk seluruh elemen */
+    html, body, [class*="css"] { 
+        font-family: 'Inter', sans-serif; 
+    }
+    
+    /* KARTU METRIK: Menggunakan variabel bawaan Streamlit agar otomatis berubah warna */
     .consulting-card {
-        background-color: #ffffff;
-        border-left: 4px solid #0f172a;
+        background-color: var(--background-secondary-color); /* Otomatis abu-abu terang di light mode, abu-abu gelap di dark mode */
+        border-left: 4px solid var(--primary-color);        /* Garis aksen mengikuti tema utama Streamlit */
         padding: 24px;
-        border-radius: 4px;
+        border-radius: 6px;
         box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         margin-bottom: 20px;
     }
-    .kpi-title { font-size: 13px; text-transform: uppercase; letter-spacing: 1px; color: #64748b; font-weight: 600; }
-    .kpi-value { font-size: 28px; font-weight: 700; color: #0f172a; margin: 8px 0; }
-    .kpi-benchmark { font-size: 12px; color: #94a3b8; }
     
-    /* Status Badges */
-    .badge-growth { background: #ecfdf5; color: #065f46; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; }
-    .badge-stable { background: #eff6ff; color: #1e40af; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; }
-    .badge-warning { background: #fef2f2; color: #991b1b; padding: 4px 12px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+    /* TEXT STYLING: Memanfaatkan variabel text-color agar tidak tenggelam saat background berubah */
+    .kpi-title { 
+        font-size: 12px; 
+        text-transform: uppercase; 
+        letter-spacing: 1px; 
+        color: var(--text-color);
+        opacity: 0.7; /* Membuat teks judul metrik sedikit lebih redup (elegan) */
+        font-weight: 600; 
+    }
+    
+    .kpi-value { 
+        font-size: 32px; 
+        font-weight: 700; 
+        color: var(--text-color); /* Otomatis hitam di light mode, putih di dark mode */
+        margin: 8px 0; 
+    }
+    
+    .kpi-benchmark { 
+        font-size: 11.5px; 
+        color: var(--text-color);
+        opacity: 0.5;
+    }
+    
+    /* STATUS BADGES: Dibuat sedikit transparan agar warna teks tetap terbaca tajam */
+    .badge-growth { background: rgba(16, 185, 129, 0.15); color: #10b981; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+    .badge-stable { background: rgba(59, 130, 246, 0.15); color: #3b82f6; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; }
+    .badge-warning { background: rgba(239, 68, 68, 0.15); color: #ef4444; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; }
     </style>
     """, unsafe_allow_html=True)
 
