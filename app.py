@@ -27,9 +27,9 @@ st.markdown("Dashboard ini menggunakan **AI (Random Forest)** untuk memprediksi 
 
 # 2. Sidebar untuk Input User
 st.sidebar.header("Input Data Keuangan")
-income = st.sidebar.number_input("Pendapatan Bulanan (IDR)", min_value=0, value=5000000, step=50000)
-expense = st.sidebar.number_input("Total Pengeluaran (IDR)", min_value=0, value=3000000, step=50000)
-debt = st.sidebar.number_input("Total Cicilan/Hutang (IDR)", min_value=0, value=500000, step=50000)
+income = st.sidebar.number_input("Pendapatan Bulanan (IDR)", min_value=0, value=0, step=50000)
+expense = st.sidebar.number_input("Total Pengeluaran (IDR)", min_value=0, value=0, step=50000)
+debt = st.sidebar.number_input("Total Cicilan/Hutang (IDR)", min_value=0, value=0, step=50000)
 
 # 3. Hitung Feature Engineering (Harus sama dengan di Notebook)
 expense_ratio = expense / income if income > 0 else 0
