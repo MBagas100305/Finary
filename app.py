@@ -4,13 +4,21 @@ import joblib
 import numpy as np
 import os
 
-# 1. Konfigurasi Halaman Modern (Harus di bagian paling atas)
+# 1. Konfigurasi Halaman & Tema Minimalis
 st.set_page_config(
-    page_title="FINARY - AI Financial Dashboard",
-    page_icon="📊",
+    page_title="FINARY | Predictive Financial Analytics",
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+# Custom CSS untuk merapikan font dan UI agar terlihat konsisten
+st.markdown("""
+    <style>
+    .reportview-container { background: #fdfdfd; }
+    .metric-label { font-size: 14px !important; color: #555555 !important; font-weight: 500; }
+    .status-badge { padding: 6px 14px; border-radius: 4px; font-size: 14px; font-weight: 600; display: inline-block; }
+    </style>
+    """, unsafe_allow_html=True)
 
 def load_data(file_name):
     if os.path.exists(file_name):
@@ -18,31 +26,31 @@ def load_data(file_name):
     elif os.path.exists(os.path.join('finary', file_name)):
         return joblib.load(os.path.join('finary', file_name))
     else:
-        raise FileNotFoundError(f"File {file_name} tidak ditemukan di root maupun folder finary")
+        raise FileNotFoundError(f"File {file_name} tidak ditemukan pada direktori sistem.")
 
 try:
     model = load_data('model_finary.pkl')
     encoder = load_data('label_encoder.pkl')
     model_features = load_data('model_features.pkl')
 except Exception as e:
-    st.error(f"⚠️ Gagal memuat komponen AI: {e}")
+    st.error(f"Sistem gagal menginisialisasi modul analitik: {e}")
     st.stop()
 
-# ------------------ SIDEBAR & INPUT ------------------
-st.sidebar.header("🎯 Navigasi & Input")
-st.sidebar.markdown("Masukkan detail kondisi finansial bulanan Anda di bawah ini:")
+# ------------------ SIDEBAR CONTROL PANEL ------------------
+st.sidebar.markdown("### **Panel Kendali Data**")
+st.sidebar.markdown("Silakan masukkan parameter keuangan bulanan entitas secara akurat.")
 
 with st.sidebar.form(key="financial_form"):
-    income = st.number_input("💵 Pendapatan Bulanan (IDR)", min_value=0, value=0, step=100000)
-    expense = st.number_input("📉 Total Pengeluaran (IDR)", min_value=0, value=0, step=100000)
-    debt = st.number_input("💳 Total Cicilan/Hutang (IDR)", min_value=0, value=0, step=50000)
+    income = st.number_input("Pendapatan Bulanan (IDR)", min_value=0, value=0, step=100000)
+    expense = st.number_input("Total Pengeluaran (IDR)", min_value=0, value=0, step=100000)
+    debt = st.number_input("Total Komitmen Cicilan / Hutang (IDR)", min_value=0, value=0, step=50000)
     
-    submit_button = st.form_submit_button(label="⚡ Analisis Finansial", use_container_width=True)
+    submit_button = st.form_submit_button(label="Jalankan Prediksi Sistem", use_container_width=True)
 
-# ------------------ MAIN HERO SECTION ------------------
-st.title("📊 FINARY")
-st.caption("Advanced AI Financial Health Management Analytics powered by Random Forest")
-st.markdown("---")
+# ------------------ MAIN DASHBOARD HEADER ------------------
+st.title("FINARY Analytics")
+st.caption("Platform Analitik Prediktif Kesehatan Finansial Berbasis Komputasi Random Forest")
+st.markdown("<hr style='margin-top:0; margin-bottom:25px;'>", unsafe_allow_html=True)
 
 # Feature Engineering
 expense_ratio = expense / income if income > 0 else 0
@@ -50,12 +58,11 @@ net_cash_flow = income - expense
 debt_pressure = debt / income if income > 0 else 0
 
 if submit_button:
-    # Validasi input kosong agar UI tidak rusak atau menampilkan angka nol semua
     if income == 0:
-        st.warning("⚠️ Mohon isi 'Pendapatan Bulanan' Anda terlebih dahulu pada sidebar.")
+        st.warning("Eror Validasi: Nilai pendapatan bulanan tidak boleh kosong untuk melakukan kalkulasi rasio.")
         st.stop()
 
-    # 1. Menyiapkan Dataframe untuk Model
+    # Konstruksi Dataframe untuk Input Model
     input_df = pd.DataFrame(0, index=[0], columns=model_features)
     if 'expense_ratio' in input_df.columns:
         input_df['expense_ratio'] = expense_ratio
@@ -65,92 +72,94 @@ if submit_button:
         input_df['debt_pressure'] = debt_pressure
 
     try:
-        # 2. Eksekusi Prediksi AI
+        # Eksekusi Model
         input_df = input_df[model_features] 
         prediction = model.predict(input_df)
         res_label = encoder.inverse_transform(prediction)
         kondisi = res_label[0]
         
-        # 3. Layout Pengelompokan Hasil & Insight
-        tab1, tab2 = st.tabs(["🎯 Hasil Analisis & Rekomendasi", "📈 Detail Komposisi Keuangan"])
+        # Segmentasi Layout Utama
+        tab1, tab2 = st.tabs(["Ringkasan Eksekutif", "Metrik & Struktur Data"])
         
         with tab1:
-            st.markdown("### Status Kesehatan Finansial")
+            st.markdown("### Kesimpulan Kondisi Finansial")
             
-            # Tampilan Status Modern menggunakan Containers berbatasan
             with st.container(border=True):
                 col_status, col_desc = st.columns([1, 2])
+                
                 with col_status:
+                    # Desain Badge Status Premium & Clean (Tanpa emoji, fokus pada warna solid perusahaan)
                     if kondisi == 'Growth':
-                        st.html("<h2 style='color:#2ecc71; margin-top:0;'>🚀 GROWTH</h2>")
-                        st.html("<span style='background-color:rgba(46,204,113,0.1); padding:5px 10px; border-radius:5px; color:#2ecc71;'>Sangat Sehat</span>")
+                        st.html("<h1 style='color:#1b5e20; margin:0; font-weight:800; font-size:32px;'>GROWTH</h1>")
+                        st.html("<span class='status-badge' style='background-color:#e8f5e9; color:#1b5e20;'>Klasifikasi: Sangat Sehat</span>")
                     elif kondisi == 'Stable':
-                        st.html("<h2 style='color:#3498db; margin-top:0;'>✅ STABLE</h2>")
-                        st.html("<span style='background-color:rgba(52,152,219,0.1); padding:5px 10px; border-radius:5px; color:#3498db;'>Cukup Aman</span>")
+                        st.html("<h1 style='color:#0d47a1; margin:0; font-weight:800; font-size:32px;'>STABLE</h1>")
+                        st.html("<span class='status-badge' style='background-color:#e3f2fd; color:#0d47a1;'>Klasifikasi: Optimal</span>")
                     else:
-                        st.html("<h2 style='color:#e74c3c; margin-top:0;'>⚠️ WARNING</h2>")
-                        st.html("<span style='background-color:rgba(231,76,60,0.1); padding:5px 10px; border-radius:5px; color:#e74c3c;'>Waspada!</span>")
+                        st.html("<h1 style='color:#b71c1c; margin:0; font-weight:800; font-size:32px;'>WARNING</h1>")
+                        st.html("<span class='status-badge' style='background-color:#ffebee; color:#b71c1c;'>Klasifikasi: Risiko Tinggi</span>")
                 
                 with col_desc:
+                    st.markdown("**Hasil Penilaian Komputasi AI:**")
                     if kondisi == 'Growth':
-                        st.markdown("**Analisis AI:** Arus kas Anda bekerja dengan sangat optimal. Anda memiliki ruang yang luas untuk mengalokasikan dana ke pos investasi jangka panjang.")
+                        st.markdown("Struktur keuangan menunjukkan ekspansi positif dengan kapasitas retensi modal yang tinggi. Direkomendasikan untuk meningkatkan alokasi pada instrumen pertumbuhan investasi jangka panjang.")
                     elif kondisi == 'Stable':
-                        st.markdown("**Analisis AI:** Finansial Anda berada dalam posisi seimbang dan aman. Fokus utama saat ini adalah memperkuat fondasi dana darurat sebelum beralih ke instrumen berisiko tinggi.")
+                        st.markdown("Kondisi neraca keuangan berada pada posisi ekuilibrium yang aman. Fokus manajemen saat ini diarahkan pada pemenuhan likuiditas dana darurat sebelum melakukan ekspansi aset.")
                     else:
-                        st.markdown("**Analisis AI:** Deteksi pola pengeluaran atau beban cicilan Anda berada dalam zona kritis. Diperlukan evaluasi segera dan pemangkasan pengeluaran non-prioritas.")
+                        st.markdown("Indikator mendeteksi adanya tekanan pada arus kas akibat ketidakseimbangan rasio pengeluaran atau beban leverage. Diperlukan tindakan korektif berupa restrukturisasi anggaran sesegera mungkin.")
 
-            st.markdown("### Insight Strategis")
-            # Tampilan Metrik Dinamis dengan Pembungkus Card Modern
+            st.markdown("### Indikator Utama")
             with st.container(border=True):
                 m1, m2, m3 = st.columns(3)
                 
                 m1.metric(
-                    label="Rasio Pengeluaran", 
-                    value=f"{expense_ratio * 100:.1f}%", 
-                    delta="Di Bawah Batas Aman (≤ 70%)" if expense_ratio <= 0.7 else "Melebihi Batas Aman (> 70%)",
+                    label="Rasio Pengeluaran Bulanan", 
+                    value=f"{expense_ratio * 100:.2f}%", 
+                    delta="Di bawah ambang batas (≤ 70%)" if expense_ratio <= 0.7 else "Melebihi ambang batas (> 70%)",
                     delta_color="normal" if expense_ratio <= 0.7 else "inverse"
                 )
                 
                 m2.metric(
-                    label="Sisa Kas (Net Cash Flow)", 
+                    label="Arus Kas Bersih (Net Cash Flow)", 
                     value=f"IDR {net_cash_flow:,.0f}", 
-                    delta="Surplus Akumulatif" if net_cash_flow > 0 else "Mengalami Defisit",
+                    delta="Surplus" if net_cash_flow > 0 else "Defisit",
                     delta_color="normal" if net_cash_flow > 0 else "inverse"
                 )
                 
-                # Menentukan parameter alokasi berdasarkan kondisi
+                # Formula kalkulasi target dana simpanan minimum
                 if kondisi == 'Growth':
                     rekomendasi_saving = income * 0.30
-                    tips = "Alokasikan ke instrumen investasi produktif"
+                    tips = "Alokasikan ke portofolio produktif"
                 elif kondisi == 'Stable':
                     rekomendasi_saving = income * 0.20
-                    tips = "Saran simpan di reksadana pasar uang"
+                    tips = "Prioritaskan instrumen likuiditas tinggi"
                 else:
                     rekomendasi_saving = income * 0.10
-                    tips = "Tahan pengeluaran tersier sekunder!"
+                    tips = "Retensi modal minimal untuk mitigasi risiko"
                     
                 m3.metric(
-                    label="Target Tabungan Minimal", 
+                    label="Proyeksi Minimum Tabungan", 
                     value=f"IDR {rekomendasi_saving:,.0f}", 
                     delta=tips
                 )
 
         with tab2:
-            st.markdown("### Breakdown Indikator Keuangan")
+            st.markdown("### Parameter Komposisi Keuangan")
             with st.container(border=True):
                 c1, c2 = st.columns(2)
                 with c1:
-                    st.info(f"**Pendapatan Bersih:** IDR {income:,.0f}")
-                    st.info(f"**Alokasi Belanja:** IDR {expense:,.0f}")
+                    st.text_input("Total Pendapatan Terdaftar", value=f"IDR {income:,.0f}", disabled=True)
+                    st.text_input("Total Pengeluaran Operasional", value=f"IDR {expense:,.0f}", disabled=True)
                 with c2:
-                    st.info(f"**Beban Cicilan/Hutang:** IDR {debt:,.0f}")
-                    st.info(f"**Rasio Tekanan Hutang:** {debt_pressure * 100:.1f}%")
+                    st.text_input("Total Kewajiban / Hutang", value=f"IDR {debt:,.0f}", disabled=True)
+                    st.text_input("Rasio Tekanan Leverage (Debt Ratio)", value=f"{debt_pressure * 100:.2f}%", disabled=True)
 
     except Exception as e:
-        st.error(f"Terjadi kesalahan teknis saat engine memproses komputasi: {e}")
+        st.error(f"Kegagalan sistem pada pemrosesan komputasi internal: {e}")
 
 else:
-    # State awal ketika aplikasi dibuka, disajikan lewat struktur card info modern
+    # State Awal Aplikasi (Clean minimalis placeholder)
     with st.container(border=True):
-        st.markdown("#### 👋 Selamat Datang di FINARY Analytics Platform")
-        st.info("Sistem siap menerima parameter data. Silakan lengkapi formulir keuangan Anda di sidebar sebelah kiri, kemudian klik tombol **Analisis Finansial** untuk mengaktifkan model prediksi.")
+        st.markdown("##### **Sistem Analitik Keuangan FINARY**")
+        st.markdown("Status: *Menunggu Input Data*")
+        st.caption("Silakan masukkan variabel data keuangan Anda melalui panel kendali di sebelah kiri, kemudian tekan tombol 'Jalankan Prediksi Sistem' untuk memulai analisis komparatif AI.")
