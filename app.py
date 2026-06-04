@@ -11,40 +11,48 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Custom Corporate Style Sheet (Adaptif Mode Terang & Gelap)
+# Custom Corporate Style Sheet (Adaptif & High-Contrast untuk Mode Terang/Gelap)
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    html, body, [class*="css"] { font-family: 'Inter', sans-serif; }
     
-    /* Menggunakan font Inter untuk seluruh elemen */
-    html, body, [class*="css"] { 
-        font-family: 'Inter', sans-serif; 
+    /* 1. BRANDING TITLE: Menggunakan warna teks utama sistem agar kontrasnya dijamin 100% */
+    .brand-title {
+        font-size: 32px;
+        font-weight: 700;
+        color: var(--text-color); /* Otomatis Putih di dark mode, Hitam/Navy di light mode */
+        margin-bottom: 0;
+    }
+    .brand-sub {
+        font-weight: 300;
+        color: var(--primary-color); /* Menggunakan warna aksen tema Streamlit Anda */
     }
     
-    /* KARTU METRIK: Menggunakan variabel bawaan Streamlit agar otomatis berubah warna */
+    /* 2. KARTU METRIK: Latar belakang sekunder otomatis adaptif */
     .consulting-card {
-        background-color: var(--background-secondary-color); /* Otomatis abu-abu terang di light mode, abu-abu gelap di dark mode */
-        border-left: 4px solid var(--primary-color);        /* Garis aksen mengikuti tema utama Streamlit */
+        background-color: var(--background-secondary-color); 
+        border-left: 4px solid var(--primary-color);        
         padding: 24px;
         border-radius: 6px;
         box-shadow: 0 1px 3px rgba(0,0,0,0.05);
         margin-bottom: 20px;
     }
     
-    /* TEXT STYLING: Memanfaatkan variabel text-color agar tidak tenggelam saat background berubah */
+    /* 3. JUDUL METRIK / KPI TITLE */
     .kpi-title { 
         font-size: 12px; 
         text-transform: uppercase; 
         letter-spacing: 1px; 
         color: var(--text-color);
-        opacity: 0.7; /* Membuat teks judul metrik sedikit lebih redup (elegan) */
+        opacity: 0.7; /* Mengurangi kepekatan secara proporsional, aman di semua mode */
         font-weight: 600; 
     }
     
     .kpi-value { 
         font-size: 32px; 
         font-weight: 700; 
-        color: var(--text-color); /* Otomatis hitam di light mode, putih di dark mode */
+        color: var(--text-color); 
         margin: 8px 0; 
     }
     
@@ -54,7 +62,7 @@ st.markdown("""
         opacity: 0.5;
     }
     
-    /* STATUS BADGES: Dibuat sedikit transparan agar warna teks tetap terbaca tajam */
+    /* 4. STATUS BADGES: Menggunakan warna pastel semi-transparan agar tidak merusak mata */
     .badge-growth { background: rgba(16, 185, 129, 0.15); color: #10b981; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; }
     .badge-stable { background: rgba(59, 130, 246, 0.15); color: #3b82f6; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; }
     .badge-warning { background: rgba(239, 68, 68, 0.15); color: #ef4444; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 600; }
@@ -91,7 +99,8 @@ with st.sidebar.form(key="financial_form"):
 # ------------------ TOP NAVIGATION / BRANDING ------------------
 col_brand, col_nav = st.columns([1, 1])
 with col_brand:
-    st.markdown("<h2 style='font-weight:700; color:#0f172a; margin-bottom:0;'>FINARY <span style='font-weight:300; color:#64748b;'>Intelligence</span></h2>", unsafe_allow_html=True)
+    # Memakai class kustom yang sudah dihubungkan ke var(--text-color)
+    st.markdown("<p class='brand-title'>FINARY <span class='brand-sub'>Intelligence</span></p>", unsafe_allow_html=True)
     st.caption("Firma Penasihat Manajemen Finansial Berbasis Komputasi Prediktif & Machine Learning")
 
 st.markdown("<br>", unsafe_allow_html=True)
